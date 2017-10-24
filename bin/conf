@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+
+'use strict'
+
+/**
+ * Module dependencies.
+ */
+
+let app = require('../index');
+let debug = require('debug');
