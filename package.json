@@ -1,0 +1,26 @@
+{
+  "name": "propolis-node-conf",
+  "version": "1.0.0",
+  "description": "Propolis Node Configuration Getter.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PropolisFramework/propolis-node-conf.git"
+  },
+  "keywords": [
+    "propolis",
+    "conf",
+    "settings",
+    "configuration",
+    "cascading"
+  ],
+  "author": "Jean-Nicolas Boulay <jn@yaloub.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PropolisFramework/propolis-node-conf/issues"
+  },
+  "homepage": "https://github.com/PropolisFramework/propolis-node-conf#readme"
+}
