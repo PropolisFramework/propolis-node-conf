@@ -14,6 +14,12 @@ let fs = require('fs'),
     path = require('path');
 
 /**
+ * Other Vars.
+ */
+let applicationEnv,
+    ArraySlice = Array.prototype.slice;
+
+/**
  * Set module global variables.
  */
 let rootConfPath,
@@ -22,17 +28,70 @@ let rootConfPath,
 
 /**
  * Casting of an object to an array.
+ * @since 1.0.0
  * @param {Object} items
- * @return {array|*}
+ * @return {Array|*}
  */
 let castArr = function (items) {
-    return Array.prototype.slice.call(items);
+    return ArraySlice.call(items);
+};
+
+/**
+ * Setter for applicationEnv module global variable.
+ * @since 1.0.0
+ * @param {String} [appEnv] - Application Environment name, also known in this context has a `level`.
+ */
+let setApplicationEnv = function (appEnv) {
+    if (typeof appEnv === 'undefined' || !appEnv) {
+        applicationEnv = process.env.APPLICATION_ENV;
+    } else {
+        applicationEnv = appEnv;
+    }
+
+    applicationEnv = (!applicationEnv) ? '' : applicationEnv;
+
+    if (typeof applicationEnv !== 'string') {
+        throw Error("The `appEnv` param for this method needs to be a string.");
+    }
+
+    if (!levelExist(applicationEnv)) {
+        applicationEnv = 'common';
+        if (!levelExist(applicationEnv)) {
+            applicationEnv = 'default';
+            if (!levelExist(applicationEnv)) {
+                throw Error("There seems to be missing configuration directories. The `default/` directory should be present at all times.");
+            }
+        }
+    }
+};
+
+/**
+ * Check if a particular level exists.
+ * @since 1.0.0
+ * @param {String} levelName - The name of the level.
+ * @return {Boolean}
+ */
+let levelExist = function (levelName) {
+    let levelsNames = getLevelsNames();
+    return (levelsNames.indexOf(levelName) !== -1);
+};
+
+/**
+ * Getter for the Application Env.
+ * @since 1.0.0
+ * @return {String}
+ */
+let getApplicationEnv = function () {
+    if (typeof applicationEnv === 'undefined' || !applicationEnv) {
+        setApplicationEnv();
+    }
+    return applicationEnv;
 };
 
 /**
  * Setter for configuration path.
  * @since 1.0.0
- * @param {...string} [arguments] - Multi-params for generating path for conf/ directory.
+ * @param {...String} [arguments] - Multi-params for generating path for conf/ directory.
  * @return {void}
  */
 let setConfPath = function () {
@@ -44,11 +103,11 @@ let setConfPath = function () {
 /**
  * Getter for configuration path.
  * @since 1.0.0
- * @param {...string} [arguments] - Multi-params for generating path for conf/ directory.
- * @returns {string|*}
+ * @param {...String} [arguments] - Multi-params for generating path for conf/ directory.
+ * @returns {String|*}
  */
 let getConfPath = function () {
-    if (typeof rootConfPath === 'undefined') {
+    if (typeof rootConfPath === 'undefined' || !rootConfPath) {
         setConfPath.apply(null, castArr(arguments));
     }
     return rootConfPath;
@@ -56,21 +115,18 @@ let getConfPath = function () {
 
 /**
  * Get the path to the level directory.
- * @param {string} levelName - The name of the level directory in the conf/ directory.
- * @return {string}
+ * @since 1.0.0
+ * @param {String} levelName - The name of the level directory in the conf/ directory.
+ * @return {String}
  */
 let getLevelPath = function (levelName) {
     return path.join(getConfPath(), levelName);
 };
 
-let getLevelsPaths = function () {
-
-};
-
 /**
  * Get a list of all the configuration levels name.
  * @since 1.0.0
- * @return {array}
+ * @return {Array}
  */
 let getLevelsNames = function () {
     let confPath = getConfPath();
@@ -78,10 +134,27 @@ let getLevelsNames = function () {
 };
 
 /**
+ * Get levels paths.
+ * @since 1.0.0
+ * @return {Array}
+ */
+let getLevelsPaths = function () {
+    let confPath = getConfPath(),
+        levelsNames = getLevelsNames(),
+        result = [];
+
+    for (let i=0; i<levelsNames.length; ++i) {
+        result.push(path.join(confPath, levelsNames[i]));
+    }
+
+    return result;
+};
+
+/**
  * Get configuration list.
  * @since 1.0.0
- * @param {string} levelName - The configuration specific level path.
- * @return {string|array|*}
+ * @param {String} levelName - The configuration specific level path.
+ * @return {String|Array|*}
  */
 let getConfList = function (levelName) {
     return fs.readdirSync(getLevelPath(levelName));
@@ -90,8 +163,8 @@ let getConfList = function (levelName) {
 /**
  * Get configuration file content.
  * @since 1.0.0
- * @param {...string} [arguments] - Multi-params for generating path for conf/ directory.
- * @return {object}
+ * @param {...String} [arguments] - Multi-params for generating path for conf/ directory.
+ * @return {Object}
  */
 let getConf = function () {
     let confPath = getConfPath();
@@ -132,7 +205,13 @@ console.log('getLevelsNames');
 console.log(getLevelsNames());
 
 console.log('getConfList');
-console.log(getConfList());
+console.log(getConfList('dev'));
+
+console.log('getLevelsPaths');
+console.log(getLevelsPaths());
+
+console.log('getApplicationEnv');
+console.log(getApplicationEnv());
 
 /**
  * @constant
