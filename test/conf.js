@@ -29,6 +29,12 @@ describe('conf', () => {
     let confStagingDir = path.join(confDir, 'staging/');
     let confProductionDir = path.join(confDir, 'production/');
 
+    it('Casting of an Object to an array type', () => {
+        expect(conf._castArr({0: 'foo', 1: 'bar'}))
+            .to
+            .equal(['foo', 'bar'])
+    });
+
     it('Set configuration path using default path', () => {
         conf.setConfPath();
         expect(conf._rootConfPath)
