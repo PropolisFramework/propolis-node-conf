@@ -17,7 +17,12 @@ let fs = require('fs'),
  * Other Vars.
  */
 let applicationEnv,
-    ArraySlice = Array.prototype.slice;
+    cascadeLevelNames = [],
+    cascadeLevelsPaths = [],
+    ArraySlice = Array.prototype.slice,
+    readFileOptions = {
+        encoding: "utf-8"
+    };
 
 /**
  * Set module global variables.
@@ -39,6 +44,7 @@ let castArr = function (items) {
 /**
  * Setter for applicationEnv module global variable.
  * @since 1.0.0
+ * @throws {TypeError} Will throw type error if the param is not a string.
  * @param {String} [appEnv] - Application Environment name, also known in this context has a `level`.
  */
 let setApplicationEnv = function (appEnv) {
@@ -51,17 +57,7 @@ let setApplicationEnv = function (appEnv) {
     applicationEnv = (!applicationEnv) ? '' : applicationEnv;
 
     if (typeof applicationEnv !== 'string') {
-        throw Error("The `appEnv` param for this method needs to be a string.");
-    }
-
-    if (!levelExist(applicationEnv)) {
-        applicationEnv = 'common';
-        if (!levelExist(applicationEnv)) {
-            applicationEnv = 'default';
-            if (!levelExist(applicationEnv)) {
-                throw Error("There seems to be missing configuration directories. The `default/` directory should be present at all times.");
-            }
-        }
+        throw TypeError("The `appEnv` param for this method needs to be a string.");
     }
 };
 
@@ -95,9 +91,13 @@ let getApplicationEnv = function () {
  * @return {void}
  */
 let setConfPath = function () {
-    rootConfPath = (arguments.length === 0) ?
-        path.join(__dirname, 'conf/') :
-        path.join.apply(null, castArr(arguments));
+        if (arguments.length === 0) {
+            rootConfPath = path.join(__dirname, 'conf/');
+        } else {
+            let args = castArr(arguments);
+            args.push('conf');
+            rootConfPath = path.join.apply(null, args);
+        }
 };
 
 /**
@@ -151,6 +151,70 @@ let getLevelsPaths = function () {
 };
 
 /**
+ * Setter for cascade levels names.
+ * @throws Will throw an error if the default directory is not found in the conf/ directory.
+ * @since 1.0.0
+ * @return {void}
+ */
+let setCascadeLevelsNames = function () {
+    let env = getApplicationEnv();
+
+    if (levelExist(env)) {
+        cascadeLevelNames.push(env);
+    }
+
+    if (levelExist('common')) {
+        cascadeLevelNames.push('common');
+    }
+
+    if (!levelExist('default')) {
+        throw Error("You need the default/ directory in the conf/ directory.");
+    }
+
+    cascadeLevelNames.push('default');
+};
+
+/**
+ * Get cascade levels names.
+ * @since 1.0.0
+ * @return {Array}
+ */
+let getCascadeLevelsNames = function () {
+    if (cascadeLevelNames.length <= 0) {
+        setCascadeLevelsNames();
+    }
+
+    return cascadeLevelNames;
+};
+
+/**
+ * Setter for cascade levels paths.
+ * @since 1.0.0
+ * @return {void}
+ */
+let setCascadeLevelsPaths = function () {
+    let confPath = getConfPath(),
+        casLevelsNames = getCascadeLevelsNames();
+
+    for (let i=0; i<casLevelsNames.length; ++i) {
+        cascadeLevelsPaths.push(path.join(confPath, casLevelsNames[i]));
+    }
+};
+
+/**
+ * Get cascade levels paths.
+ * @since 1.0.0
+ * @return {Array}
+ */
+let getCascadeLevelsPaths = function () {
+    if (cascadeLevelsPaths.length <= 0) {
+        setCascadeLevelsPaths();
+    }
+
+    return cascadeLevelsPaths;
+};
+
+/**
  * Get configuration list.
  * @since 1.0.0
  * @param {String} levelName - The configuration specific level path.
@@ -179,6 +243,31 @@ let getConf = function () {
     }
 };
 
+/**
+ *
+ * @return {Array}
+ */
+let getConfs = function () {
+    let confPath = getConfPath(),
+        confLevelsNames = getCascadeLevelsNames(),
+        confPaths = [];
+
+    console.log('In getConfs');
+
+    for (let i=0; i<confLevelsNames.length; ++i) {
+        let levelName = confLevelsNames[i],
+            confList = getConfList(confLevelsNames[i]);
+
+        for (let x=0; x<confList.length; ++x) {
+            confPaths.push(path.join(confPath, levelName, confList[x]));
+        }
+        //let confContent = fs.readFileSync(confLevelsNames[i], readFileOptions);
+        //console.log(confContent);
+    }
+
+    console.log(confPaths);
+};
+
 let saveCache = function () {
 
 };
@@ -187,7 +276,7 @@ console.log(rootConfPath);
 setConfPath();
 
 console.log(rootConfPath);
-setConfPath(__dirname, 'test', 'conf');
+setConfPath(__dirname, 'test');
 console.log(rootConfPath);
 
 console.log('getConfPath: ');
@@ -199,7 +288,7 @@ console.log(getConfPath());
 
 rootConfPath = undefined;
 console.log('[after reset and added to args] getConfPath: ');
-console.log(getConfPath(__dirname, 'test', 'conf'));
+console.log(getConfPath(__dirname, 'test'));
 
 console.log('getLevelsNames');
 console.log(getLevelsNames());
@@ -212,6 +301,12 @@ console.log(getLevelsPaths());
 
 console.log('getApplicationEnv');
 console.log(getApplicationEnv());
+
+console.log('getCascadeLevelsPaths');
+console.log(getCascadeLevelsPaths());
+
+console.log('getConfs');
+getConfs();
 
 /**
  * @constant
