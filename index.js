@@ -11,7 +11,8 @@
  * Module dependencies.
  */
 let fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    yaml = require('js-yaml');
 
 /**
  * Other Vars.
@@ -225,7 +226,22 @@ let getConfList = function (levelName) {
 };
 
 /**
- * Get configuration file content.
+ * Get configuration content.
+ * @since 1.0.0
+ * @param path
+ * @throws {Error} Will throw type error if there was an issue with safeLoad from js-yaml.
+ * @return {Object|*}
+ */
+let getConfContent = function (path) {
+    try {
+        return yaml.safeLoad(fs.readFileSync(path, readFileOptions));
+    } catch (e) {
+        throw Error(e.message);
+    }
+};
+
+/**
+ * Get configuration from a specific file.
  * @since 1.0.0
  * @param {...String} [arguments] - Multi-params for generating path for conf/ directory.
  * @return {Object}
@@ -244,28 +260,64 @@ let getConf = function () {
 };
 
 /**
- *
- * @return {Array}
+ * Get configurations.
+ * @since 1.0.0
+ * @param {Object} [options] - Options for what this method will output.
+ * @return {Object}
  */
-let getConfs = function () {
+let getConfs = function (options) {
+
+    let optionsDefault = {
+        'squash': false,
+        'metadata': true
+    };
+
+    if (typeof options === 'undefined') {
+        options = optionsDefault;
+    } else if (typeof options.squash !== 'boolean') {
+        options.squash = optionsDefault.squash;
+    } else if (typeof options.metadata !== 'boolean') {
+        options.metadata = optionsDefault.metadata;
+    }
+
     let confPath = getConfPath(),
         confLevelsNames = getCascadeLevelsNames(),
-        confPaths = [];
-
-    console.log('In getConfs');
+        confPaths = [],
+        conf = {};
 
     for (let i=0; i<confLevelsNames.length; ++i) {
         let levelName = confLevelsNames[i],
             confList = getConfList(confLevelsNames[i]);
 
+        conf[levelName] = {};
+
         for (let x=0; x<confList.length; ++x) {
-            confPaths.push(path.join(confPath, levelName, confList[x]));
+            let confFilePath = path.join(confPath, levelName, confList[x]),
+                content = getConfContent(confFilePath),
+                regexConfFile = /(.*)\.[^.]+$/.exec(confList[x]),
+                confFileName = regexConfFile[1];
+
+            conf[levelName][confFileName] = (typeof content === 'object') ? content : {};
+            confPaths.push(confFilePath);
         }
-        //let confContent = fs.readFileSync(confLevelsNames[i], readFileOptions);
-        //console.log(confContent);
     }
 
-    console.log(confPaths);
+    if (options.squash) {
+
+    }
+
+    if (options.metadata) {
+        let newConf = {};
+        newConf['metadata'] = {
+            'confPath': confPath,
+            'confPaths': confPaths,
+            'confLevelsNames': confLevelsNames
+        };
+        newConf['conf'] = conf;
+        conf = newConf;
+    }
+
+    return conf;
 };
 
 let saveCache = function () {
