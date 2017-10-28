@@ -3,6 +3,7 @@
  * @module conf
  * @version 1.0.0
  * @author Jean-Nicolas Boulay <jn@yaloub.com>
+ * {@link https://github.com/PropolisFramework/ GitHub}
  */
 
 'use strict';
@@ -16,6 +17,7 @@ let fs = require('fs'),
 
 /**
  * Other Vars.
+ * @private
  */
 let applicationEnv,
     cascadeLevelNames = [],
@@ -52,14 +54,13 @@ let setApplicationEnv = function (appEnv) {
     if (typeof appEnv === 'undefined' || !appEnv) {
         applicationEnv = process.env.APPLICATION_ENV;
     } else {
+        if (typeof appEnv !== 'string' && typeof appEnv !== 'undefined') {
+            throw TypeError("The `appEnv` param for this method needs to be a string.");
+        }
         applicationEnv = appEnv;
     }
 
-    applicationEnv = (!applicationEnv) ? '' : applicationEnv;
-
-    if (typeof applicationEnv !== 'string') {
-        throw TypeError("The `appEnv` param for this method needs to be a string.");
-    }
+    applicationEnv = (!applicationEnv) ? 'dev' : applicationEnv;
 };
 
 /**
@@ -263,19 +264,21 @@ let getConf = function () {
  * Get configurations.
  * @since 1.0.0
  * @param {Object} [options] - Options for what this method will output.
+ * @param {Boolean} [options.merge=true] - If you want the configuration to merge.
+ * @param {Boolean} [options.metadata=false] - If you want to get metadata.
  * @return {Object}
  */
 let getConfs = function (options) {
 
     let optionsDefault = {
-        'squash': false,
-        'metadata': true
+        'merge': true,
+        'metadata': false
     };
 
     if (typeof options === 'undefined') {
         options = optionsDefault;
-    } else if (typeof options.squash !== 'boolean') {
-        options.squash = optionsDefault.squash;
+    } else if (typeof options.merge !== 'boolean') {
+        options.merge = optionsDefault.merge;
     } else if (typeof options.metadata !== 'boolean') {
         options.metadata = optionsDefault.metadata;
     }
@@ -302,8 +305,15 @@ let getConfs = function (options) {
         }
     }
 
-    if (options.squash) {
+    console.log(conf);
 
+    if (options.merge) {
+        for (let y = 0; y < conf.length; ++y) {
+            let level = conf[y];
+            for (let w = 0; w < level.length; ++w) {
+                let setting = level[w];
+            }
+        }
     }
 
     if (options.metadata) {
