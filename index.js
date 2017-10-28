@@ -306,14 +306,19 @@ let getConfs = function (options) {
     }
 
     console.log(conf);
+    console.log(options.merge);
 
     if (options.merge) {
-        for (let y = 0; y < conf.length; ++y) {
-            let level = conf[y];
-            for (let w = 0; w < level.length; ++w) {
-                let setting = level[w];
+        console.log('merge');
+        let mergeResult = {};
+        for (let level in conf) {
+            console.log(level);
+            for (let settings in level) {
+                console.log(settings);
+                mergeResult = Object.assign(mergeResult, settings);
             }
         }
+        console.log(mergeResult);
     }
 
     if (options.metadata) {
