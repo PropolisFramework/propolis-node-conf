@@ -35,8 +35,32 @@ let rootConfPath,
     confCache;
 
 /**
+ * Is param an type object?
+ * @private
+ * @param obj
+ * @return {Boolean}
+ */
+let isObject = function (obj) {
+    return obj !== null && typeof obj === 'object';
+};
+
+/**
+ * Is it an object and empty?
+ * @private
+ * @param obj
+ * @return {Boolean}
+ */
+let isPlainObject = function (obj) {
+    return isObject(obj) && (
+        obj.constructor === Object  // obj = {}
+        || obj.constructor === undefined // obj = Object.create(null)
+    );
+};
+
+/**
  * Casting of an object to an array.
  * @since 1.0.0
+ * @private
  * @param {Object} items
  * @return {Array|*}
  */
@@ -242,6 +266,57 @@ let getConfContent = function (path) {
 };
 
 /**
+ * Merging of settings.
+ * @since 1.0.0
+ * @private
+ * @param {Object} mergeResult
+ * @param {Object} settings
+ * @return {Object|Array|*}
+ */
+let mergeSettings = function (mergeResult, settings) {
+    //let tmpObj = {};
+
+    /*console.log('mergeResult: ');
+    console.log(mergeResult);
+
+    console.log('settings: ');
+    console.log(settings);*/
+
+    console.log('mergeResult: ');
+    console.log(mergeResult);
+    for (let setting in settings) {
+        if (settings.hasOwnProperty(setting) && isNaN(setting)) {
+            let settingValue = settings[setting];
+
+            if (isObject(settingValue)) {
+                console.log('settingValue: ');
+                console.log(settingValue);
+                console.log('setting: ');
+                console.log(setting);
+                console.log('{{{{{{{{{');
+                console.log(mergeResult);
+                console.log(mergeResult[setting]);
+                mergeResult[setting] = mergeSettings(mergeResult[setting], settingValue);
+                console.log(mergeResult);
+                console.log('[[[[[[[[[');
+                /*subObj = mergeSettings(tmpObj, settingValue);
+                console.log('tmpObj: ');
+                console.log(tmpObj);
+                tmpObj = Object.assign(subObj, tmpObj);*/
+            }
+        }
+    }
+
+    if (Array.isArray(settings)) {
+        console.log('isArray mergeResult: ');
+        console.log(mergeResult);
+        return mergeResult.concat(settings);
+    } else {
+        return Object.assign(mergeResult, settings);
+    }
+};
+
+/**
  * Get configuration from a specific file.
  * @since 1.0.0
  * @param {...String} [arguments] - Multi-params for generating path for conf/ directory.
@@ -312,13 +387,41 @@ let getConfs = function (options) {
         console.log('merge');
         let mergeResult = {};
         for (let level in conf) {
-            console.log(level);
-            for (let settings in level) {
-                console.log(settings);
-                mergeResult = Object.assign(mergeResult, settings);
+            if (conf.hasOwnProperty(level) && isNaN(level)) {
+                //console.log(conf[level]);
+                let levelConfFiles = conf[level];
+
+                console.log('++++++++++++++++++++++++++++++++++++++++++++');
+                console.log('Level: ' + level);
+                console.log('::::::::::::::::::::::::::::::::::::::::::::');
+
+                for (let levelConfFile in levelConfFiles) {
+                    //console.log(levelConfFile);
+                    if (levelConfFiles.hasOwnProperty(levelConfFile) && isNaN(levelConfFile)) {
+                        //console.log(levelConfFiles[levelConfFile]);
+                        let settings = levelConfFiles[levelConfFile];
+                        mergeResult = mergeSettings(mergeResult, settings);
+                        console.log('ConfFile: ' + levelConfFile);
+                        console.log('==============');
+                        //console.log(mergeResult);
+                        console.log('==============');
+                        //console.log(settings);
+                        //console.log(typeof settings);
+                        //mergeResult = Object.assign(settings, mergeResult);
+                        //console.log(mergeResult);
+                    }
+                    //    console.log('settings: ');
+                    //console.log(settings);
+                    //mergeResult = Object.assign(mergeResult, settings);
+                }
             }
+            /*console.log(levelKey);
+            console.log('levelVlaue: ');
+            console.log(levelValue);*/
+
         }
-        console.log(mergeResult);
+        console.log('----------------------');
+        //console.log(mergeResult);
     }
 
     if (options.metadata) {

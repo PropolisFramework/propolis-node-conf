@@ -1,2 +1,10 @@
 level: common
 name: main.yml
+multiLevel:
+  - One
+  - Common
+MultiLevelObj:
+  level: MultiLevelObj default
+  name: MultiLevelObj main.yml
+  common: MultiLevelObj specific
+common: specific

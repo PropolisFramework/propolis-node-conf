@@ -1,2 +1,7 @@
 level: production
 name: main.yml
+MultiLevelObj:
+  level: MultiLevelObj default
+  name: MultiLevelObj main.yml
+  production: MultiLevelObj specific
+production: specific

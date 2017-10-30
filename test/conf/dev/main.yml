@@ -1,2 +1,12 @@
 level: dev
 name: main.yml
+multiLevel:
+  - One
+  - Dev
+MultiLevelObj:
+  level: MultiLevelObj default
+  name: MultiLevelObj main.yml
+  dev: MultiLevelObj specific
+Empty:
+  -
+dev: specific
