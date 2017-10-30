@@ -25,7 +25,8 @@ let applicationEnv,
     ArraySlice = Array.prototype.slice,
     readFileOptions = {
         encoding: "utf-8"
-    };
+    },
+    mergeSettingsExecCount = 0;
 
 /**
  * Set module global variables.
@@ -55,6 +56,14 @@ let isPlainObject = function (obj) {
         obj.constructor === Object  // obj = {}
         || obj.constructor === undefined // obj = Object.create(null)
     );
+};
+
+Object.size = function(obj) {
+    let size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
 };
 
 /**
@@ -274,6 +283,11 @@ let getConfContent = function (path) {
  * @return {Object|Array|*}
  */
 let mergeSettings = function (mergeResult, settings) {
+    mergeSettingsExecCount++;
+    console.log('mergeSettingsExecCount: ');
+    console.log(mergeSettingsExecCount);
+    console.log('**************************');
+    console.log(mergeResult);
     //let tmpObj = {};
 
     /*console.log('mergeResult: ');
@@ -288,7 +302,14 @@ let mergeSettings = function (mergeResult, settings) {
         if (settings.hasOwnProperty(setting) && isNaN(setting)) {
             let settingValue = settings[setting];
 
-            if (isObject(settingValue)) {
+            if (Array.isArray(settingValue)) {
+                console.log('mergeResult.length: ');
+                console.log(Object.size(mergeResult));
+                if (!Array.isArray(mergeResult) && isObject(mergeResult) && Object.size(mergeResult) === 0) {
+                    mergeResult = [];
+                }
+                mergeResult = mergeSettings(mergeResult, settingValue);
+            } else if (isObject(settingValue)) {
                 console.log('settingValue: ');
                 console.log(settingValue);
                 console.log('setting: ');
@@ -310,8 +331,11 @@ let mergeSettings = function (mergeResult, settings) {
     if (Array.isArray(settings)) {
         console.log('isArray mergeResult: ');
         console.log(mergeResult);
+        console.log(settings);
         return mergeResult.concat(settings);
     } else {
+        console.log('else: ');
+        console.log(mergeResult);
         return Object.assign(mergeResult, settings);
     }
 };
@@ -400,6 +424,7 @@ let getConfs = function (options) {
                     if (levelConfFiles.hasOwnProperty(levelConfFile) && isNaN(levelConfFile)) {
                         //console.log(levelConfFiles[levelConfFile]);
                         let settings = levelConfFiles[levelConfFile];
+                        mergeSettingsExecCount = 0;
                         mergeResult = mergeSettings(mergeResult, settings);
                         console.log('ConfFile: ' + levelConfFile);
                         console.log('==============');
