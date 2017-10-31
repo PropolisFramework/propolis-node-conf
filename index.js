@@ -15,6 +15,8 @@ let fs = require('fs'),
     path = require('path'),
     yaml = require('js-yaml');
 
+const _ = require('lodash');
+
 /**
  * Other Vars.
  * @private
@@ -58,6 +60,11 @@ let isPlainObject = function (obj) {
     );
 };
 
+/**
+ * Get object size.
+ * @param obj
+ * @return {Number}
+ */
 Object.size = function(obj) {
     let size = 0, key;
     for (key in obj) {
@@ -263,81 +270,23 @@ let getConfList = function (levelName) {
  * Get configuration content.
  * @since 1.0.0
  * @param path
- * @throws {Error} Will throw type error if there was an issue with safeLoad from js-yaml.
  * @return {Object|*}
  */
 let getConfContent = function (path) {
-    try {
-        return yaml.safeLoad(fs.readFileSync(path, readFileOptions));
-    } catch (e) {
-        throw Error(e.message);
-    }
+    return yaml.safeLoad(fs.readFileSync(path, readFileOptions));
 };
 
 /**
  * Merging of settings.
+ * {@link https://github.com/alexlafroscia/yaml-merge/blob/master/index.js | Source}
  * @since 1.0.0
  * @private
- * @param {Object} mergeResult
- * @param {Object} settings
- * @return {Object|Array|*}
+ * @param from
+ * @return {Object}
  */
-let mergeSettings = function (mergeResult, settings) {
-    mergeSettingsExecCount++;
-    console.log('mergeSettingsExecCount: ');
-    console.log(mergeSettingsExecCount);
-    console.log('**************************');
-    console.log(mergeResult);
-    //let tmpObj = {};
-
-    /*console.log('mergeResult: ');
-    console.log(mergeResult);
-
-    console.log('settings: ');
-    console.log(settings);*/
-
-    console.log('mergeResult: ');
-    console.log(mergeResult);
-    for (let setting in settings) {
-        if (settings.hasOwnProperty(setting) && isNaN(setting)) {
-            let settingValue = settings[setting];
-
-            if (Array.isArray(settingValue)) {
-                console.log('mergeResult.length: ');
-                console.log(Object.size(mergeResult));
-                if (!Array.isArray(mergeResult) && isObject(mergeResult) && Object.size(mergeResult) === 0) {
-                    mergeResult = [];
-                }
-                mergeResult = mergeSettings(mergeResult, settingValue);
-            } else if (isObject(settingValue)) {
-                console.log('settingValue: ');
-                console.log(settingValue);
-                console.log('setting: ');
-                console.log(setting);
-                console.log('{{{{{{{{{');
-                console.log(mergeResult);
-                console.log(mergeResult[setting]);
-                mergeResult[setting] = mergeSettings(mergeResult[setting], settingValue);
-                console.log(mergeResult);
-                console.log('[[[[[[[[[');
-                /*subObj = mergeSettings(tmpObj, settingValue);
-                console.log('tmpObj: ');
-                console.log(tmpObj);
-                tmpObj = Object.assign(subObj, tmpObj);*/
-            }
-        }
-    }
-
-    if (Array.isArray(settings)) {
-        console.log('isArray mergeResult: ');
-        console.log(mergeResult);
-        console.log(settings);
-        return mergeResult.concat(settings);
-    } else {
-        console.log('else: ');
-        console.log(mergeResult);
-        return Object.assign(mergeResult, settings);
-    }
+let mergeSettings = function (...from) {
+    const files = from.map((path) => getConfContent(path));
+    return _.merge({}, ...files);
 };
 
 /**
@@ -404,49 +353,9 @@ let getConfs = function (options) {
         }
     }
 
-    console.log(conf);
-    console.log(options.merge);
-
     if (options.merge) {
-        console.log('merge');
-        let mergeResult = {};
-        for (let level in conf) {
-            if (conf.hasOwnProperty(level) && isNaN(level)) {
-                //console.log(conf[level]);
-                let levelConfFiles = conf[level];
-
-                console.log('++++++++++++++++++++++++++++++++++++++++++++');
-                console.log('Level: ' + level);
-                console.log('::::::::::::::::::::::::::::::::::::::::::::');
-
-                for (let levelConfFile in levelConfFiles) {
-                    //console.log(levelConfFile);
-                    if (levelConfFiles.hasOwnProperty(levelConfFile) && isNaN(levelConfFile)) {
-                        //console.log(levelConfFiles[levelConfFile]);
-                        let settings = levelConfFiles[levelConfFile];
-                        mergeSettingsExecCount = 0;
-                        mergeResult = mergeSettings(mergeResult, settings);
-                        console.log('ConfFile: ' + levelConfFile);
-                        console.log('==============');
-                        //console.log(mergeResult);
-                        console.log('==============');
-                        //console.log(settings);
-                        //console.log(typeof settings);
-                        //mergeResult = Object.assign(settings, mergeResult);
-                        //console.log(mergeResult);
-                    }
-                    //    console.log('settings: ');
-                    //console.log(settings);
-                    //mergeResult = Object.assign(mergeResult, settings);
-                }
-            }
-            /*console.log(levelKey);
-            console.log('levelVlaue: ');
-            console.log(levelValue);*/
-
-        }
-        console.log('----------------------');
-        //console.log(mergeResult);
+        confPaths.reverse();
+        console.log(mergeSettings.apply(null, confPaths));
     }
 
     if (options.metadata) {
