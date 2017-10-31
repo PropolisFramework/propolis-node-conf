@@ -269,7 +269,7 @@ let getConfList = function (levelName) {
 /**
  * Get configuration content.
  * @since 1.0.0
- * @param path
+ * @param {String} path - Configuration file path.
  * @return {Object|*}
  */
 let getConfContent = function (path) {
@@ -281,7 +281,7 @@ let getConfContent = function (path) {
  * {@link https://github.com/alexlafroscia/yaml-merge/blob/master/index.js | Source}
  * @since 1.0.0
  * @private
- * @param from
+ * @param {...String} from - Configuration file paths.
  * @return {Object}
  */
 let mergeSettings = function (...from) {
@@ -320,19 +320,36 @@ let getConfs = function (options) {
 
     let optionsDefault = {
         'merge': true,
-        'metadata': false
+        'metadata': false,
+        'useCache': true
     };
 
     if (typeof options === 'undefined') {
         options = optionsDefault;
-    } else if (typeof options.merge !== 'boolean') {
+    }
+
+    if (typeof options.merge !== 'boolean') {
         options.merge = optionsDefault.merge;
-    } else if (typeof options.metadata !== 'boolean') {
+    }
+
+    if (typeof options.metadata !== 'boolean') {
         options.metadata = optionsDefault.metadata;
     }
 
-    let confPath = getConfPath(),
-        confLevelsNames = getCascadeLevelsNames(),
+    if (typeof options.useCache !== 'boolean') {
+        options.useCache = optionsDefault.useCache;
+    }
+
+    let confPath = getConfPath();
+
+    if (options.useCache) {
+        let cacheFilePath = path.join(confPath, 'cache', 'config.json');
+
+        fs.readFileSync(cacheFilePath, readFileOptions);
+        return;
+    }
+
+    let confLevelsNames = getCascadeLevelsNames(),
         confPaths = [],
         conf = {};
 
@@ -343,19 +360,23 @@ let getConfs = function (options) {
         conf[levelName] = {};
 
         for (let x=0; x<confList.length; ++x) {
-            let confFilePath = path.join(confPath, levelName, confList[x]),
-                content = getConfContent(confFilePath),
-                regexConfFile = /(.*)\.[^.]+$/.exec(confList[x]),
-                confFileName = regexConfFile[1];
+            let confFilePath = path.join(confPath, levelName, confList[x]);
 
-            conf[levelName][confFileName] = (typeof content === 'object') ? content : {};
+            if (!options.merge) {
+                let content = getConfContent(confFilePath),
+                    regexConfFile = /(.*)\.[^.]+$/.exec(confList[x]),
+                    confFileName = regexConfFile[1];
+
+                conf[levelName][confFileName] = (typeof content === 'object') ? content : {};
+            }
+
             confPaths.push(confFilePath);
         }
     }
 
     if (options.merge) {
         confPaths.reverse();
-        console.log(mergeSettings.apply(null, confPaths));
+        conf = mergeSettings.apply(null, confPaths);
     }
 
     if (options.metadata) {
@@ -373,7 +394,15 @@ let getConfs = function (options) {
 };
 
 let saveCache = function () {
+    let confPath = getConfPath(),
+        cachePath = path.join(confPath, 'cache'),
+        cacheFilePath = path.join(cachePath, 'config.json');
 
+    if (!fs.existsSync(cachePath)) {
+        fs.mkdirSync(cachePath);
+    }
+
+    fs.writeFileSync(cacheFilePath, JSON.stringify(getConfs()));
 };
 
 console.log(rootConfPath);
@@ -410,7 +439,19 @@ console.log('getCascadeLevelsPaths');
 console.log(getCascadeLevelsPaths());
 
 console.log('getConfs');
-getConfs();
+console.log(getConfs());
+
+console.log('getConfs without merge');
+console.log(getConfs({'merge': false}));
+
+console.log('getConfs metadata');
+console.log(getConfs({'metadata': true}));
+
+//console.log('getConfs metadata');
+//console.log(getConfs({'merge': false, 'metadata': true}));
+
+console.log('saveCache');
+saveCache();
 
 /**
  * @constant
