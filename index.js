@@ -24,7 +24,6 @@ const _ = require('lodash');
 let applicationEnv,
     cascadeLevelNames = [],
     cascadeLevelsPaths = [],
-    ArraySlice = Array.prototype.slice,
     readFileOptions = {
         encoding: "utf-8"
     };
@@ -42,19 +41,6 @@ let rootConfPath;
  */
 let isObject = function (obj) {
     return obj !== null && typeof obj === 'object';
-};
-
-/**
- * Is it an object and empty?
- * @private
- * @param obj
- * @return {Boolean}
- */
-let isPlainObject = function (obj) {
-    return isObject(obj) && (
-        obj.constructor === Object  // obj = {}
-        || obj.constructor === undefined // obj = Object.create(null)
-    );
 };
 
 /**
@@ -79,7 +65,9 @@ Object.size = function(obj) {
  * @return {Array|*}
  */
 let castArr = function (items) {
-    return ArraySlice.call(items);
+    return Object.keys(items).map(function(key) {
+        return items[key];
+    });
 };
 
 /**
@@ -108,7 +96,7 @@ let setApplicationEnv = function (appEnv) {
  * @return {Boolean}
  */
 let levelExist = function (levelName) {
-    let levelsNames = getLevelsNames();
+    let levelsNames = getLevelNames();
     return (levelsNames.indexOf(levelName) !== -1);
 };
 
@@ -164,23 +152,23 @@ let getLevelPath = function (levelName) {
 };
 
 /**
- * Get a list of all the configuration levels name.
+ * Get a list of all the configuration level names.
  * @since 1.0.0
  * @return {Array}
  */
-let getLevelsNames = function () {
+let getLevelNames = function () {
     let confPath = getConfPath();
     return fs.readdirSync(confPath);
 };
 
 /**
- * Get levels paths.
+ * Get level paths.
  * @since 1.0.0
  * @return {Array}
  */
-let getLevelsPaths = function () {
+let getLevelPaths = function () {
     let confPath = getConfPath(),
-        levelsNames = getLevelsNames(),
+        levelsNames = getLevelNames(),
         result = [];
 
     for (let i=0; i<levelsNames.length; ++i) {
@@ -191,7 +179,7 @@ let getLevelsPaths = function () {
 };
 
 /**
- * Setter for cascade levels names.
+ * Setter for cascade level names.
  * @throws Will throw an error if the default directory is not found in the conf/ directory.
  * @since 1.0.0
  * @return {void}
@@ -422,7 +410,7 @@ let rmCache = function () {
 
 /**
  * Set methods.
- * @type {{setApplicationEnv: setApplicationEnv, levelExist: levelExist, getApplicationEnv: getApplicationEnv, setConfPath: setConfPath, getConfPath: getConfPath, getLevelPath: getLevelPath, getLevelsNames: getLevelsNames, getLevelsPaths: getLevelsPaths, setCascadeLevelsNames: setCascadeLevelsNames, getCascadeLevelsNames: getCascadeLevelsNames, setCascadeLevelsPaths: setCascadeLevelsPaths, getCascadeLevelsPaths: getCascadeLevelsPaths, getConfList: getConfList, getConfContent: getConfContent, getConf: getConf, getConfs: getConfs, saveCache: saveCache}}
+ * @type {{setApplicationEnv: setApplicationEnv, levelExist: levelExist, getApplicationEnv: getApplicationEnv, setConfPath: setConfPath, getConfPath: getConfPath, getLevelPath: getLevelPath, getLevelNames: getLevelNames, getLevelPaths: getLevelPaths, setCascadeLevelsNames: setCascadeLevelsNames, getCascadeLevelsNames: getCascadeLevelsNames, setCascadeLevelsPaths: setCascadeLevelsPaths, getCascadeLevelsPaths: getCascadeLevelsPaths, getConfList: getConfList, getConfContent: getConfContent, getConf: getConf, getConfs: getConfs, saveCache: saveCache}}
  */
 const methods = {
     "setApplicationEnv": setApplicationEnv,
@@ -431,8 +419,8 @@ const methods = {
     "setConfPath": setConfPath,
     "getConfPath": getConfPath,
     "getLevelPath": getLevelPath,
-    "getLevelsNames": getLevelsNames,
-    "getLevelsPaths": getLevelsPaths,
+    "getLevelNames": getLevelNames,
+    "getLevelPaths": getLevelPaths,
     "setCascadeLevelsNames": setCascadeLevelsNames,
     "getCascadeLevelsNames": getCascadeLevelsNames,
     "setCascadeLevelsPaths": setCascadeLevelsPaths,
