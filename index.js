@@ -27,15 +27,12 @@ let applicationEnv,
     ArraySlice = Array.prototype.slice,
     readFileOptions = {
         encoding: "utf-8"
-    },
-    mergeSettingsExecCount = 0;
+    };
 
 /**
  * Set module global variables.
  */
-let rootConfPath,
-    cachePath,
-    confCache;
+let rootConfPath;
 
 /**
  * Is param an type object?
@@ -62,6 +59,7 @@ let isPlainObject = function (obj) {
 
 /**
  * Get object size.
+ * @private
  * @param obj
  * @return {Number}
  */
@@ -292,6 +290,9 @@ let mergeSettings = function (...from) {
 /**
  * Get configuration from a specific file.
  * @since 1.0.0
+ * @example
+ * // return {...}
+ * getConf('dev', 'main.yml');
  * @param {...String} [arguments] - Multi-params for generating path for conf/ directory.
  * @return {Object}
  */
@@ -299,13 +300,14 @@ let getConf = function () {
     let confPath = getConfPath();
 
     if (arguments.length === 0) {
-        // All
+        throw Error("What is the config files you are looking for?");
     }
 
-    let confs={};
-    for (let i = 0; i < arguments.length; ++i) {
-        let arg = arguments[i];
-    }
+    let args = castArr(arguments),
+        arrPath = [confPath].concat(args),
+        fullPath = path.join.apply(null, arrPath);
+
+    return getConfContent(fullPath);
 };
 
 /**
@@ -344,9 +346,9 @@ let getConfs = function (options) {
 
     if (options.useCache) {
         let cacheFilePath = path.join(confPath, 'cache', 'config.json');
-
-        fs.readFileSync(cacheFilePath, readFileOptions);
-        return;
+        if (fs.existsSync(cacheFilePath)) {
+            return getConfContent(cacheFilePath);
+        }
     }
 
     let confLevelsNames = getCascadeLevelsNames(),
@@ -393,6 +395,9 @@ let getConfs = function (options) {
     return conf;
 };
 
+/**
+ * Creates a cache version of the configurations.
+ */
 let saveCache = function () {
     let confPath = getConfPath(),
         cachePath = path.join(confPath, 'cache'),
@@ -405,66 +410,39 @@ let saveCache = function () {
     fs.writeFileSync(cacheFilePath, JSON.stringify(getConfs()));
 };
 
-console.log(rootConfPath);
-setConfPath();
-
-console.log(rootConfPath);
-setConfPath(__dirname, 'test');
-console.log(rootConfPath);
-
-console.log('getConfPath: ');
-console.log(getConfPath());
-
-rootConfPath = undefined;
-console.log('[after reset] getConfPath: ');
-console.log(getConfPath());
-
-rootConfPath = undefined;
-console.log('[after reset and added to args] getConfPath: ');
-console.log(getConfPath(__dirname, 'test'));
-
-console.log('getLevelsNames');
-console.log(getLevelsNames());
-
-console.log('getConfList');
-console.log(getConfList('dev'));
-
-console.log('getLevelsPaths');
-console.log(getLevelsPaths());
-
-console.log('getApplicationEnv');
-console.log(getApplicationEnv());
-
-console.log('getCascadeLevelsPaths');
-console.log(getCascadeLevelsPaths());
-
-console.log('getConfs');
-console.log(getConfs());
-
-console.log('getConfs without merge');
-console.log(getConfs({'merge': false}));
-
-console.log('getConfs metadata');
-console.log(getConfs({'metadata': true}));
-
-//console.log('getConfs metadata');
-//console.log(getConfs({'merge': false, 'metadata': true}));
-
-console.log('saveCache');
-saveCache();
-
 /**
- * @constant
- * @type {{getConfPath: (function(*=)), getLevels: (function()), getConfList: (function(string)), getConf: (function())}}
+ * Remove cache directory.
  */
-/*const methods = {
-    "_rootConfPath": rootConfPath,
-    "_confCache": confCache,
-    "_castArr": castArr,
-    "getConfPath": getConfPath,
-    "getLevels": getLevels,
-    "getConfList": getConfList,
-    "getConf": getConf
+let rmCache = function () {
+    let confPath = getConfPath(),
+        cachePath = path.join(confPath, 'cache');
+
+    fs.rmdir(cachePath);
 };
 
-module.exports = methods;*/
+/**
+ * Set methods.
+ * @type {{setApplicationEnv: setApplicationEnv, levelExist: levelExist, getApplicationEnv: getApplicationEnv, setConfPath: setConfPath, getConfPath: getConfPath, getLevelPath: getLevelPath, getLevelsNames: getLevelsNames, getLevelsPaths: getLevelsPaths, setCascadeLevelsNames: setCascadeLevelsNames, getCascadeLevelsNames: getCascadeLevelsNames, setCascadeLevelsPaths: setCascadeLevelsPaths, getCascadeLevelsPaths: getCascadeLevelsPaths, getConfList: getConfList, getConfContent: getConfContent, getConf: getConf, getConfs: getConfs, saveCache: saveCache}}
+ */
+const methods = {
+    "setApplicationEnv": setApplicationEnv,
+    "levelExist": levelExist,
+    "getApplicationEnv": getApplicationEnv,
+    "setConfPath": setConfPath,
+    "getConfPath": getConfPath,
+    "getLevelPath": getLevelPath,
+    "getLevelsNames": getLevelsNames,
+    "getLevelsPaths": getLevelsPaths,
+    "setCascadeLevelsNames": setCascadeLevelsNames,
+    "getCascadeLevelsNames": getCascadeLevelsNames,
+    "setCascadeLevelsPaths": setCascadeLevelsPaths,
+    "getCascadeLevelsPaths": getCascadeLevelsPaths,
+    "getConfList": getConfList,
+    "getConfContent": getConfContent,
+    "getConf": getConf,
+    "getConfs": getConfs,
+    "saveCache": saveCache,
+    "rmCache": rmCache
+};
+
+module.exports = methods;
