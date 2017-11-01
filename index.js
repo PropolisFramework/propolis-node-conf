@@ -184,7 +184,7 @@ let getLevelPaths = function () {
  * @since 1.0.0
  * @return {void}
  */
-let setCascadeLevelsNames = function () {
+let setCascadeLevelNames = function () {
     let env = getApplicationEnv();
 
     if (levelExist(env)) {
@@ -203,26 +203,26 @@ let setCascadeLevelsNames = function () {
 };
 
 /**
- * Get cascade levels names.
+ * Get cascade level names.
  * @since 1.0.0
  * @return {Array}
  */
-let getCascadeLevelsNames = function () {
+let getCascadeLevelNames = function () {
     if (cascadeLevelNames.length <= 0) {
-        setCascadeLevelsNames();
+        setCascadeLevelNames();
     }
 
     return cascadeLevelNames;
 };
 
 /**
- * Setter for cascade levels paths.
+ * Setter for cascade level paths.
  * @since 1.0.0
  * @return {void}
  */
-let setCascadeLevelsPaths = function () {
+let setCascadeLevelPaths = function () {
     let confPath = getConfPath(),
-        casLevelsNames = getCascadeLevelsNames();
+        casLevelsNames = getCascadeLevelNames();
 
     for (let i=0; i<casLevelsNames.length; ++i) {
         cascadeLevelsPaths.push(path.join(confPath, casLevelsNames[i]));
@@ -230,13 +230,13 @@ let setCascadeLevelsPaths = function () {
 };
 
 /**
- * Get cascade levels paths.
+ * Get cascade level paths.
  * @since 1.0.0
  * @return {Array}
  */
-let getCascadeLevelsPaths = function () {
+let getCascadeLevelPaths = function () {
     if (cascadeLevelsPaths.length <= 0) {
-        setCascadeLevelsPaths();
+        setCascadeLevelPaths();
     }
 
     return cascadeLevelsPaths;
@@ -339,7 +339,7 @@ let getConfs = function (options) {
         }
     }
 
-    let confLevelsNames = getCascadeLevelsNames(),
+    let confLevelsNames = getCascadeLevelNames(),
         confPaths = [],
         conf = {};
 
@@ -410,7 +410,7 @@ let rmCache = function () {
 
 /**
  * Set methods.
- * @type {{setApplicationEnv: setApplicationEnv, levelExist: levelExist, getApplicationEnv: getApplicationEnv, setConfPath: setConfPath, getConfPath: getConfPath, getLevelPath: getLevelPath, getLevelNames: getLevelNames, getLevelPaths: getLevelPaths, setCascadeLevelsNames: setCascadeLevelsNames, getCascadeLevelsNames: getCascadeLevelsNames, setCascadeLevelsPaths: setCascadeLevelsPaths, getCascadeLevelsPaths: getCascadeLevelsPaths, getConfList: getConfList, getConfContent: getConfContent, getConf: getConf, getConfs: getConfs, saveCache: saveCache}}
+ * @type {{setApplicationEnv: setApplicationEnv, levelExist: levelExist, getApplicationEnv: getApplicationEnv, setConfPath: setConfPath, getConfPath: getConfPath, getLevelPath: getLevelPath, getLevelNames: getLevelNames, getLevelPaths: getLevelPaths, setCascadeLevelNames: setCascadeLevelNames, getCascadeLevelNames: getCascadeLevelNames, setCascadeLevelPaths: setCascadeLevelPaths, getCascadeLevelPaths: getCascadeLevelPaths, getConfList: getConfList, getConfContent: getConfContent, getConf: getConf, getConfs: getConfs, saveCache: saveCache}}
  */
 const methods = {
     "setApplicationEnv": setApplicationEnv,
@@ -421,10 +421,10 @@ const methods = {
     "getLevelPath": getLevelPath,
     "getLevelNames": getLevelNames,
     "getLevelPaths": getLevelPaths,
-    "setCascadeLevelsNames": setCascadeLevelsNames,
-    "getCascadeLevelsNames": getCascadeLevelsNames,
-    "setCascadeLevelsPaths": setCascadeLevelsPaths,
-    "getCascadeLevelsPaths": getCascadeLevelsPaths,
+    "setCascadeLevelNames": setCascadeLevelNames,
+    "getCascadeLevelNames": getCascadeLevelNames,
+    "setCascadeLevelPaths": setCascadeLevelPaths,
+    "getCascadeLevelPaths": getCascadeLevelPaths,
     "getConfList": getConfList,
     "getConfContent": getConfContent,
     "getConf": getConf,

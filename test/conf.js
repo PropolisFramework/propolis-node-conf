@@ -61,6 +61,7 @@ describe('Test basic functions', () => {
             .to
             .equal('alex');
         process.env.APPLICATION_ENV = 'dev';
+        confModule.setApplicationEnv();
     });
 
     it('Setter for Application Env - Get error thrown for wrong type from the param (TypeError)', () => {
@@ -78,91 +79,6 @@ describe('Test basic functions', () => {
             .equal(path.join(__dirname, '../', 'conf'));
     });
 
-    /*it('Set configuration path using default path', () => {
-        conf.setConfPath();
-        expect(conf._rootConfPath)
-            .to
-            .equal(path.join(__dirname, 'conf'))
-    });
-
-   /* it('Set configuration path using set with param path', () => {
-        conf.setConfPath('../conf');
-        expect(conf._rootConfPath)
-            .to
-            .equal(path.join(__dirname, '../conf'))
-    });
-
-    it('Get configuration path using set by default', () => {
-        conf._rootConfPath = undefined;
-        expect(conf.getConfPath())
-            .to
-            .equal(path.join(__dirname, 'conf'))
-    });
-
-    it('Get configuration path using set by using param path', () => {
-        conf._rootConfPath = undefined;
-        expect(conf.getConfPath('../conf'))
-            .to
-            .equal(path.join(__dirname, '../conf'))
-    });
-
-    it('List all the conf levels using directory names without specific conf/ path', () => {
-        expect(conf.getLevels())
-            .to
-            .equal(['common', 'default', 'dev', 'production', 'staging'])
-    });
-
-    it('List all the conf levels using directory names with specific conf/ path', () => {
-        expect(conf.getLevels(confDir))
-            .to
-            .equal(['common', 'default', 'dev', 'production', 'staging'])
-    });
-
-    it('List all the config files inside conf level directories', () => {
-        expect(conf.getConfList())
-            .to
-            .equal(['main.json', 'other.json', 'default-extra.json'])
-    });
-
-    it('List all the config files inside conf level directories', () => {
-        expect(conf.getConfList(confDevDir))
-            .to
-            .equal(['main.json', 'other.json', 'default-extra.json'])
-    });
-
-    it('List all the config files inside conf level directories', () => {
-        expect(conf.getConf('main'))
-            .to
-            .equal({"level": "dev", "name": "main"})
-    });
-
-    it('List all the config files inside conf level directories', () => {
-        expect(conf.getConf('main', 'other'))
-            .to
-            .equal({"main": {"level": "dev", "name": "main"}, "other": {"level": "dev", "name": "other"}})
-    });
-
-    it('List all the config files inside conf level directories', () => {
-        expect(conf.getConf('main', 'other', 'default-extra'))
-            .to
-            .equal({
-                "main": {"level": "dev", "name": "main"},
-                "other": {"level": "dev", "name": "other"},
-                "default-extra": {"level": "default", "name": "default-extra"}
-            })
-    });
-
-    it('List all the config files inside conf level directories', () => {
-        expect(conf.getConf('main', 'other', 'default-extra', 'common-extra'))
-            .to
-            .equal({
-                "main": {"level": "dev", "name": "main"},
-                "other": {"level": "dev", "name": "other"},
-                "default-extra": {"level": "default", "name": "default-extra"},
-                "common-extra": {"level": "common", "name": "common-extra"}
-            })
-    });
-*/
 });
 
 describe('Test conf methods with test configurations files', () => {
@@ -176,6 +92,12 @@ describe('Test conf methods with test configurations files', () => {
         expect(confModule.getConfPath())
             .to
             .equal(path.join(__dirname, 'conf'));
+    });
+
+    it('Get level path', () => {
+        expect(confModule.getLevelPath('dev'))
+            .to
+            .equal(path.join(__dirname, 'conf', 'dev'))
     });
 
     it('List of all the conf/* directories also named levels', () => {
@@ -211,5 +133,33 @@ describe('Test conf methods with test configurations files', () => {
             ])
     });
 
+    it('Get cascading level names', () => {
+        expect(confModule.getCascadeLevelNames())
+            .to
+            .include
+            .members(["dev", "common", "default"])
+    });
+
+    it('Get cascade level paths', () => {
+        expect(confModule.getCascadeLevelPaths())
+            .to
+            .include
+            .members([
+                path.join(__dirname, "conf", "dev"),
+                path.join(__dirname, "conf", "common"),
+                path.join(__dirname, "conf", "default")
+            ])
+    });
+
+    it('Get configuration list from a level', () => {
+        expect(confModule.getConfList('dev'))
+            .to
+            .include
+            .members([ 'main.yml', 'other.yml' ])
+    });
+
+    it('Get configuration content', () => {
+        expect(confModule.getConfContent())
+    });
 
 });
