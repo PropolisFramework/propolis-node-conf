@@ -6,4 +6,6 @@ Propolis Node Conf is to make easy to manage and get the right configuration fil
 
 See the [LICENSE](LICENSE.md) file for license rights and limitations (MIT).
 
+[badge_patreon]: https://propolisframework.github.io/assets/img/patreon.svg
+
 [patreon]: https://www.patreon.com/
