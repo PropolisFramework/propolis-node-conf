@@ -5,5 +5,4 @@
 /**
  * Module dependencies.
  */
-let app = require('../index');
-let debug = require('debug');
+require('../index');
