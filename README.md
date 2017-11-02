@@ -10,5 +10,5 @@ See the [LICENSE](LICENSE.md) file for license rights and limitations (MIT).
 [badge_patreon]: https://propolisframework.github.io/assets/img/patreon.svg
 [badge_travis]: https://travis-ci.org/PropolisFramework/propolis-node-conf.svg?branch=master
 
-[patreon]: https://www.patreon.com/
+[patreon]: https://www.patreon.com/propolisframework
 [travis]: https://travis-ci.org/PropolisFramework/propolis-node-conf
