@@ -1,4 +1,4 @@
-# propolis-node-conf
+# propolis-node-library-conf
 [![Support us on Patreon][badge_patreon]][patreon] [![Build Status][badge_travis]][travis] 
 
 Propolis Node Conf is to make easy to manage and get the right configuration files with cascading.
