@@ -159,7 +159,10 @@ describe('Test conf methods with test configurations files', () => {
     });
 
     it('Get configuration content', () => {
-        expect(confModule.getConfContent())
+        let p = path.join(__dirname, 'conf', 'common', 'main.yml');
+        expect(confModule.getConfContent(p))
     });
+
+    //it('');
 
 });
