@@ -22,12 +22,17 @@ let confs = conf.getConfs();
 **Methods**
 
 * `setApplicationEnv`
-    - (String): Application Environment name, also known in this context has a `level`.
+    - {String} Application Environment name, also known in this context has a `level`.
 * `levelExist`
+    - {String} levelName - The name of the level.
 * `getApplicationEnv`
+    - {Void}
 * `setConfPath`
+    - {...String} [arguments] - Multi-params for generating path for conf/ directory.
 * `getConfPath`
+    - {...String} [arguments] - Multi-params for generating path for conf/ directory.
 * `getLevelPath`
+    - {String} levelName - The name of the level directory in the conf/ directory.
 * `getLevelNames`
 * `getLevelPaths`
 * `setCascadeLevelNames`
@@ -35,9 +40,17 @@ let confs = conf.getConfs();
 * `setCascadeLevelPaths`
 * `getCascadeLevelPaths`
 * `getConfList`
+    - {String} levelName - The configuration specific level path.
 * `getConfContent`
+    - {String} path - Configuration file path.
+* `mergeSettings`
+    - {...String} from - Configuration file paths.
 * `getConf`
+    - {...String} [arguments] - Multi-params for generating path for conf/ directory.
 * `getConfs`
+    - {Object} [options] - Options for what this method will output.
+    - {Boolean} [options.merge=true] - If you want the configuration to merge.
+    - {Boolean} [options.metadata=false] - If you want to get metadata.
 * `saveCache`
 * `rmCache`
 
