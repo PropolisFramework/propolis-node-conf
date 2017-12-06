@@ -15,7 +15,8 @@ let confModule  = require('../index');
 let conf        = rewire('../index');
 
 let castArr = conf.__get__('castArr'),
-    ObjectSize = conf.__get__('Object.size');
+    ObjectSize = conf.__get__('Object.size'),
+    mergeSettings = conf.__get__('mergeSettings');
 
 /**
  * More correct typeof string handling array
@@ -161,8 +162,88 @@ describe('Test conf methods with test configurations files', () => {
     it('Get configuration content', () => {
         let p = path.join(__dirname, 'conf', 'common', 'main.yml');
         expect(confModule.getConfContent(p))
+            .to
+            .deep
+            .equal({
+                'level': 'common',
+                'name': 'main.yml',
+                'multiLevel': ['One', 'Common'],
+                'MultiLevelObj': {
+                    'level': 'MultiLevelObj default',
+                    'name': 'MultiLevelObj main.yml',
+                    'common': 'MultiLevelObj specific'
+                },
+                'common': 'specific'
+            });
     });
 
-    //it('');
+    it('mergeSettings', () => {
+        let pOne = path.join(__dirname, 'conf', 'default', 'main.yml');
+        let pTwo = path.join(__dirname, 'conf', 'common', 'main.yml');
+
+        expect(mergeSettings(pOne, pTwo))
+            .to
+            .deep
+            .equal({
+                'level': 'common',
+                'name': 'main.yml',
+                'multiLevel': ['One', 'Common', 'OtherDefault'],
+                'MultiLevelObj': {
+                    'level': 'MultiLevelObj default',
+                    'name': 'MultiLevelObj main.yml',
+                    'common': 'MultiLevelObj specific',
+                    "default": "MultiLevelObj specific"
+                },
+                'common': 'specific',
+                'default': 'specific'
+            });
+    });
+
+    it('Get configuration content from a specific file', () => {
+            expect(confModule.getConf('common', 'main.yml'))
+                .to
+                .deep
+                .equal({
+                    "MultiLevelObj": {
+                    "common": "MultiLevelObj specific",
+                        "level": "MultiLevelObj default",
+                        "name": "MultiLevelObj main.yml"
+                    },
+                    "common": "specific",
+                    "level": "common",
+                    "multiLevel": ["One", "Common"],
+                    "name": "main.yml"
+                });
+        });
+
+    it('Get configurations content from multiple configurations files', () => {
+        expect(confModule.getConfs())
+            .to
+            .deep
+            .equal({
+                "Empty": [null],
+                "MultiLevelObj": {
+                    "common": "MultiLevelObj specific",
+                    "default": "MultiLevelObj specific",
+                    "dev": "MultiLevelObj specific",
+                    "level": "MultiLevelObj default",
+                    "name": "MultiLevelObj main.yml"
+                },
+                "common": "specific",
+                "default": "specific",
+                "dev": "specific",
+                "level": "dev",
+                "multiLevel": ["One", "Dev", "OtherDefault"],
+                "name": "main.yml"
+            });
+    });
+
+    it('Save cache', () => {
+        expect();
+    });
+
+    it('Remove cache', () => {
+        expect();
+    });
 
 });
